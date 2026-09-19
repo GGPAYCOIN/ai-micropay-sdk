@@ -29,6 +29,8 @@ CH_CACHE = {}
 VOUCHER_FILE = f"{BASE}/vouchers.json"
 CONTRACTS = json.load(open(f"{BASE}/contracts.json")) if os.path.exists(f"{BASE}/contracts.json") else {}
 DISPUTES = json.load(open(f"{BASE}/disputes.json")) if os.path.exists(f"{BASE}/disputes.json") else {}
+DISPUTE_ABI_FULL = json.load(open(f"{BASE}/dispute_abi.json")) if os.path.exists(f"{BASE}/dispute_abi.json") else []
+DISP_CACHE = {"ts": 0.0, "data": None}
 ABI = json.load(open(f"{BASE}/abi.json")) if os.path.exists(f"{BASE}/abi.json") else []
 ADMIN_KEY = os.environ.get("DATANODE_ADMIN_KEY", "")
 SETTLE_INTERVAL = int(os.environ.get("DATANODE_SETTLE_INTERVAL", "600"))
@@ -311,6 +313,35 @@ def node_stats():
             "chains": {k: {"channels": p["channels"], "queries": p["queries"], "settled": p["settled"],
                            "earned_wei": str(p["earned_wei"]), "pending_wei": str(p["pending_wei"])}
                        for k, p in per.items()}}
+
+
+@app.get("/api/datanode/disputes")
+def disputes():
+    now = time.time()
+    if DISP_CACHE["data"] and now - DISP_CACHE["ts"] < 300:
+        return DISP_CACHE["data"]
+    out = {"ok": True, "provider_address": PROVIDER_ADDRESS, "against_this_node": 0,
+           "total": 0, "chains": {}}
+    for chain, addr in DISPUTES.items():
+        if chain not in W3:
+            continue
+        try:
+            c = W3[chain].eth.contract(address=Web3.to_checksum_address(addr), abi=DISPUTE_ABI_FULL)
+            logs = c.events.DisputeFiled().get_logs(from_block=0)
+            items = []
+            for lg in logs:
+                a = lg["args"]
+                items.append({"channel_id": bytes(a["channelId"]).hex(), "accuser": a["accuser"],
+                              "provider": a["provider"], "nonce": int(a["nonce"]),
+                              "ts": int(a["ts"]), "tx": lg["transactionHash"].hex()})
+                if a["provider"].lower() == PROVIDER_ADDRESS.lower():
+                    out["against_this_node"] += 1
+            out["total"] += len(items)
+            out["chains"][chain] = {"registry": addr, "count": len(items), "disputes": items[-50:]}
+        except Exception:
+            out["chains"][chain] = {"registry": addr, "error": "lookup failed"}
+    DISP_CACHE["ts"], DISP_CACHE["data"] = now, out
+    return out
 
 
 @app.post("/api/datanode/settle")
