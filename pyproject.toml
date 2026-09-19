@@ -1,0 +1,24 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ai-micropay-sdk"
+version = "0.1.0"
+description = "Autonomous pay-per-query data purchasing for AI agents via EIP-712 payment channel micro-vouchers (GGCHAIN / Qumtam Chain / any EVM)"
+readme = "README.md"
+license = {text = "MIT"}
+authors = [{name = "Qumtam Labs"}]
+requires-python = ">=3.10"
+dependencies = ["web3>=6.0", "eth-account>=0.10", "requests>=2.28"]
+
+[project.optional-dependencies]
+langchain = ["langchain-core>=0.1"]
+
+[project.urls]
+Homepage = "https://qumtamchain.com/developers.html"
+Repository = "https://github.com/GGPAYCOIN/ai-micropay-sdk"
+"Live Data Node" = "https://qumtamchain.com/api/datanode/info"
+
+[tool.setuptools.packages.find]
+include = ["micropay*"]

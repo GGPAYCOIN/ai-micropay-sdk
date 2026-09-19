@@ -1,0 +1,21 @@
+{
+  "name": "ai-micropay-sdk",
+  "version": "0.1.0",
+  "description": "Autonomous pay-per-query data purchasing for AI agents via EIP-712 payment-channel micro-vouchers (GGCHAIN / Qumtam Chain / any EVM)",
+  "license": "MIT",
+  "repository": { "type": "git", "url": "git+https://github.com/GGPAYCOIN/ai-micropay-sdk.git" },
+  "homepage": "https://qumtamchain.com/developers.html",
+  "keywords": ["ai-agents", "micropayments", "payment-channels", "eip-712", "pay-per-query", "web3", "ethers", "langchain", "x402-alternative"],
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc"
+  },
+  "dependencies": {
+    "ethers": "^6.13.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.0"
+  }
+}
